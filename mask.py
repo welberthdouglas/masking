@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from scipy.ndimage import generate_binary_structure
-
+from scipy.ndimage import binary_fill_holes
 
 def get_bright_pixels(img:np.array, threshold:float = 255)->np.array:
     """
@@ -34,5 +34,6 @@ def get_mask(img:np.array, pixel_threshold:float)->np.array:
     
     mask = labeled_img.copy()
     bright_obj_ids = get_bright_objects_labels(labeled_img, bright_objects_slices)
+    out = np.where(np.isin(mask,bright_obj_ids),1,0)
     
-    return np.where(np.isin(mask,bright_obj_ids),0,1)
+    return 1-binary_fill_holes(out)
