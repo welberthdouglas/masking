@@ -127,3 +127,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# fits files
+data/fits/
+
+# flags
+data/flags/
+
+# np arrays
+*.npz
+
+
+#venv
+mask/
