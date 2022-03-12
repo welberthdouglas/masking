@@ -34,21 +34,13 @@ def download_fields(fields:list = FIELDS,save_path:str = DATA_DIR) -> None:
     
 def get_fits_splus(field, conn, save_path:str, bands:list=['R','G','I']) -> None:
     """
-    downloads fits files of the specified bands from splus and saves in a single fits file
+    downloads fits files of the specified bands from splus and saves in the specified path
     """
-    concat_bands = "".join(bands)
-    fits_data = []
-    
-    for i,band in enumerate(bands):
+    for band in bands:
         fz_file = conn.get_field(field, band)
-        fits_data.append(fz_file[1].data)
-        
-        if i == 0:
-            header = fz_file[1].header
-            header.extend([('CSPACE', concat_bands),('WCSAXES',2),('CSBAND1' , 'R'),('CSBAND2' , 'G'),('CSBAND3' , 'I')])
-
-    hdu = fits.PrimaryHDU(data=np.stack(fits_data, axis=0),header = header)
-    hdu.writeto(f"{save_path}{field}_bands_{concat_bands}.fits", overwrite=True)  
+        data = fz_file[1].data
+        header = fz_file[1].header
+        fits.writeto(f"{save_path}{field}_band_{band}.fits",header = header, data=data, overwrite=True)  
 
 #def get_fits_legacy(ra:float,dec:float,save_path:str,bands:str="grz") -> None:
 #    """
