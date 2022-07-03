@@ -22,14 +22,18 @@ def fits_2_rgb(fits, Q = 8, stretch = 3)-> np.array:
     g,b,r =  fits
     return make_lupton_rgb(r,g,b , Q = Q, stretch = stretch)
 
-def fits_processing(load_path = DATA_DIR, save_path = IMAGES_DIR, Q = 8, stretch = 3, bands:list=['R','G','I']) -> None:
+def fits_processing(load_path = DATA_DIR, save_path = IMAGES_DIR, Q = 8, stretch = 3, bands:list=['R','G','I'], flip:bool=False) -> None:
     """
     performs fits preprocessing (fits2rgb + saving)
     """
-    fits_files = glob.glob(load_path+"*")
+    fits_files = glob.glob(load_path+"*.fits")
     fields = set([f.replace(DATA_DIR,"").split("_")[0] for f in fits_files])
     
     for field in tqdm(fields):
         fits_data = [fits.open(DATA_DIR+f"{field}_band_{band}.fits", memmap=False)[0].data for band in bands]
         rgb = fits_2_rgb(fits_data, Q = Q, stretch = stretch)
-        np.savez(save_path + f'{field}_rgb.npz', img = np.flipud(rgb)) # flipud to make it easier to compare to legacy images
+        if flip:
+            img_out = np.flipud(rgb)
+        else:
+            img_out = rgb
+        np.savez(save_path + f'{field}_rgb.npz', img = img_out) # flipud to make it easier to compare to legacy images

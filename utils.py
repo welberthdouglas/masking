@@ -5,9 +5,13 @@ import getpass
 import splusdata
 import glob
 import random
+import astropy.wcs as wcs
 
 from tqdm import tqdm
+from astropy.coordinates import SkyCoord
+from astropy import units
 from astropy.io import fits
+from toolz import curry
 
 from config import *
 from fields import *
@@ -41,6 +45,33 @@ def get_fits_splus(field, conn, save_path:str, bands:list=['R','G','I']) -> None
         data = fz_file[1].data
         header = fz_file[1].header
         fits.writeto(f"{save_path}{field}_band_{band}.fits",header = header, data=data, overwrite=True)  
+        
+@curry
+def coord2pix(wcs_obj,coords:iter)->tuple:
+    """
+    returns the pixel location given a pair RA, DEC
+    """
+    coords_t = SkyCoord(ra = coords[0]*units.degree, dec = coords[1]*units.degree)
+    return wcs_obj.world_to_pixel(coords_t)
+
+
+def getwcs(filepath:str):
+    """
+    returns the wcs object from a fits file
+    """
+    file = fits.open(filepath)
+    return wcs.WCS(file[0].header)
+
+
+@curry
+def getcutout(wcs_obj,img:np.array,coords:iter, size:int)->np.array:
+    """
+    returns a cutout image centered in coords [RA,DEC]
+    """
+    im_coords = coord2pix(wcs_obj,coords)
+    y,x = [int(coord) for coord in im_coords]
+    return img[x - size:x + size,y - size:y + size]
+    
 
 #def get_fits_legacy(ra:float,dec:float,save_path:str,bands:str="grz") -> None:
 #    """
