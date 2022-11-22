@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import requests
@@ -30,6 +31,9 @@ def download_fields(fields:list = FIELDS,save_path:str = DATA_DIR) -> None:
     """
     download fits files for RGI bands
     """
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
     print("establishing connection to splus ...")
     conn = splus_conn()
 
