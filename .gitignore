@@ -132,6 +132,9 @@ dmypy.json
 # fits files
 data/fits/
 
+# fits images
+data/images/
+
 # flags
 data/flags/
 
