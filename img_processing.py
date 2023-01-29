@@ -5,7 +5,8 @@ import logging
 
 from astropy.io import fits
 from astropy.visualization import make_lupton_rgb
-from config import *
+from config import DATA_DIR
+from utils import load_fits
 
 logger = logging.getLogger(__name__)
 
@@ -25,19 +26,16 @@ def fits_2_rgb(fits, Q = 8, stretch = 3)-> np.array:
     g,b,r =  fits
     return make_lupton_rgb(r,g,b , Q = Q, stretch = stretch)
 
-def fits2rgb_processing(load_path:str, save_path:str, Q:float, stretch:float, bands:list, flip:bool=False, crop_borders:bool =False) -> None:
+def fits2rgb_processing(fits_data:list, Q:float, stretch:float, flip:bool=False, crop_borders:bool =False) -> list:
     """
     performs fits preprocessing (fits2rgb + saving)
     """
-
-    fits_files = glob.glob(load_path+"*.fits")
-    fields = set([f.replace(DATA_DIR,"").split("_")[0] for f in fits_files])
     
 
     logger.info("Processing Fits ...")
-    for field in tqdm(fields):
-        fits_data = [fits.open(DATA_DIR+f"{field}_band_{band}.fits", memmap=False)[0].data for band in bands]
-        rgb = fits_2_rgb(fits_data, Q = Q, stretch = stretch)
+    imgs = []
+    for data in tqdm(fits_data):
+        rgb = fits_2_rgb(data, Q = Q, stretch = stretch)
 
         if crop_borders:
             rgb = crop_image(rgb)
@@ -46,4 +44,7 @@ def fits2rgb_processing(load_path:str, save_path:str, Q:float, stretch:float, ba
             img_out = np.flipud(rgb) # flipud to make it easier to compare to legacy images
         else:
             img_out = rgb
-        np.savez(save_path + f'{field}_rgb.npz', img = img_out) 
+        
+        imgs.append(img_out)
+    
+    return imgs

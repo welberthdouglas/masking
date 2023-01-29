@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import getpass
 import splusdata
@@ -6,14 +5,12 @@ import random
 import astropy.wcs as wcs
 import logging
 
-from tqdm import tqdm
 from astropy.coordinates import SkyCoord
 from astropy import units
 from astropy.io import fits
 from toolz import curry
 
-from config import *
-from fields import *
+from config import SEED
 
 logger = logging.getLogger(__name__)
 random.seed(SEED)
@@ -22,34 +19,14 @@ def splus_conn() -> splusdata.connect:
     """
     connection with splus
     """
+    logger.info("Establishing connection to Splus ...")
     username = input(prompt="Login: ")
     password = getpass.getpass("Password: ")
     return splusdata.connect(username, password)
 
-def download_fields(fields:list, save_path:str, bands:list) -> None:
-    """
-    download fits files for RGI bands
-    """
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    
-    logger.info("Establishing connection to Splus ...")
-    conn = splus_conn()
-    
-    logger.info("Downloading fields ...")
-    for field in tqdm(fields):
-        get_fits_splus(field, conn, save_path, bands = bands)
-    
-def get_fits_splus(field, conn, save_path:str, bands:list) -> None:
-    """
-    downloads fits files of the specified bands from splus and saves in the specified path
-    """
-    for band in bands:
-        fz_file = conn.get_field(field, band)
-        data = fz_file[1].data
-        header = fz_file[1].header
-        fits.writeto(f"{save_path}{field}_band_{band}.fits",header = header, data=data, overwrite=True)  
-        
+def load_fits(file_path:str) -> fits.hdu.hdulist.HDUList:
+    return fits.open(file_path, memmap=False)[0].data
+
 @curry
 def coord2pix(wcs_obj,coords:iter)->tuple:
     """

@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from scipy.ndimage import binary_fill_holes
+from astropy.io import fits
 
 def get_bright_pixels(img:np.array, threshold:float = 255)->np.array:
     """
@@ -36,3 +37,14 @@ def get_mask(img:np.array, pixel_threshold:float)->np.array:
     out = np.where(np.isin(mask,bright_obj_ids),1,0)
     
     return 1-binary_fill_holes(out)
+
+
+def apply_masks(fits_file:fits.hdu.hdulist.HDUList, ,file_name:str, bands:list) -> None:
+
+DATA_DIR = "data/fits/"
+
+fits_file = fits.open(DATA_DIR + "SPLUS-s28s34_band_I.fits", memmap=False)
+data = fits_file[0].data*mask
+header = fits_file[0].header
+
+fits.writeto(DATA_DIR + file_name + "_masked.fits", data, header, overwrite = True) 
