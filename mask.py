@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import ndimage
-from scipy.ndimage import generate_binary_structure
 from scipy.ndimage import binary_fill_holes
 
 def get_bright_pixels(img:np.array, threshold:float = 255)->np.array:

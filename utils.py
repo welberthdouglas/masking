@@ -1,12 +1,10 @@
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-import requests
 import getpass
 import splusdata
-import glob
 import random
 import astropy.wcs as wcs
+import logging
 
 from tqdm import tqdm
 from astropy.coordinates import SkyCoord
@@ -17,9 +15,10 @@ from toolz import curry
 from config import *
 from fields import *
 
+logger = logging.getLogger(__name__)
 random.seed(SEED)
 
-def splus_conn() -> None:
+def splus_conn() -> splusdata.connect:
     """
     connection with splus
     """
@@ -27,20 +26,21 @@ def splus_conn() -> None:
     password = getpass.getpass("Password: ")
     return splusdata.connect(username, password)
 
-def download_fields(fields:list = FIELDS,save_path:str = DATA_DIR) -> None:
+def download_fields(fields:list, save_path:str, bands:list) -> None:
     """
     download fits files for RGI bands
     """
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     
-    print("establishing connection to splus ...")
+    logger.info("Establishing connection to Splus ...")
     conn = splus_conn()
-
-    for field in tqdm(fields):
-        get_fits_splus(field, conn, save_path, bands = ['R','G','I'])
     
-def get_fits_splus(field, conn, save_path:str, bands:list=['R','G','I']) -> None:
+    logger.info("Downloading fields ...")
+    for field in tqdm(fields):
+        get_fits_splus(field, conn, save_path, bands = bands)
+    
+def get_fits_splus(field, conn, save_path:str, bands:list) -> None:
     """
     downloads fits files of the specified bands from splus and saves in the specified path
     """
