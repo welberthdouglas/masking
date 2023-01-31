@@ -5,7 +5,7 @@ import logging
 from astropy.io import fits
 from tqdm import tqdm
 
-logger = logging.getLogger("__name__")
+logger = logging.getLogger(__name__)
 
 
 def get_fits_splus(field, conn, save_path:str, bands:list) -> None:

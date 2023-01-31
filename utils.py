@@ -25,7 +25,7 @@ def splus_conn() -> splusdata.connect:
     return splusdata.connect(username, password)
 
 def load_fits(file_path:str) -> fits.hdu.hdulist.HDUList:
-    return fits.open(file_path, memmap=False)[0].data
+    return fits.open(file_path, memmap=False)[0]
 
 @curry
 def coord2pix(wcs_obj,coords:iter)->tuple:

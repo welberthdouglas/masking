@@ -34,8 +34,8 @@ def fits2rgb_processing(fits_data:list, Q:float, stretch:float, flip:bool=False,
 
     logger.info("Processing Fits ...")
     imgs = []
-    for data in tqdm(fits_data):
-        rgb = fits_2_rgb(data, Q = Q, stretch = stretch)
+    for fits_file in tqdm([[f.data for f in file] for file in fits_data]):
+        rgb = fits_2_rgb(fits_file, Q = Q, stretch = stretch)
 
         if crop_borders:
             rgb = crop_image(rgb)
