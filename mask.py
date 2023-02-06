@@ -1,8 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy import ndimage
 from scipy.ndimage import binary_fill_holes
-from astropy.io import fits
-from tqdm import tqdm
+
+from config import IMAGES_DIR
+
 
 def get_bright_pixels(img:np.array, threshold:float = 255)->np.array:
     """
@@ -46,9 +48,13 @@ def apply_masks(fits_file:list, imgs:list, fields:str, pixel_threshold:float) ->
         masked_field = []
         for i in range(len(f)):
             mask = get_mask(im[:,:,i],pixel_threshold=pixel_threshold)
+            if i == 0:
+                plt.imsave(IMAGES_DIR + f'{field}_mask.png',arr= mask , cmap='gray_r')
+                plt.imsave(IMAGES_DIR + f'{field}_masked.png',arr= mask*im[:,:,i] , cmap='gray_r')
             data = f[0].data*mask
             header = f[0].header
             masked_field.append((data, header))
         masked_fields[field] = masked_field
+
     
     return masked_fields

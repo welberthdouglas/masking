@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Loading fits files ...")
 fits_files = glob.glob(DATA_DIR+"*.fits")
-fields = set([f.replace(DATA_DIR,"").split("_")[0] for f in fits_files])
+fields = list(set([f.replace(DATA_DIR,"").split("_")[0] for f in fits_files]))
 
 fits_data = []
 for field in tqdm(fields):
@@ -40,6 +40,7 @@ logger.info("Creating RGB images ...")
 imgs = fits2rgb_processing(fits_data = fits_data,Q = 8, stretch = 3)
 
 logger.info("Applying masks ...")
+masks = []
 for i in range(len(fits_data)):
     logger.info(f"Masking: {fields[i]}")
     masked = apply_masks([fits_data[i]], [imgs[i]], [fields[i]], pixel_threshold= MASK_PIXEL_THRESHOLD)
@@ -52,6 +53,19 @@ for i in range(len(fits_data)):
 
 
 logger.info("Saving RGB images ...")
-for img,field in zip(imgs,fields):
+for img,field,mask in zip(imgs,fields,masks):
     np.savez(IMAGES_DIR + f'{field}_rgb.npz', img = img) 
     plt.imsave(IMAGES_DIR + f'{field}.png',arr=img[:,:,0] , cmap='gray_r')
+
+# logger.info("Saving masked images ...")
+# fits_data = []
+# for field in tqdm(fields):
+#         fits_data.append([load_fits(DATA_DIR+f"{field}_{band}_masked.fits") for band in BANDS_TO_RGB])
+
+
+# imgs = fits2rgb_processing(fits_data = fits_data,Q = 8, stretch = 3)
+# fits_files = glob.glob(DATA_DIR+"*_masked.fits")
+# fields = set([f.replace(DATA_DIR,"").split("_")[0] for f in fits_files])
+# for img,field in zip(imgs,fields):
+#     np.savez(IMAGES_DIR + f'{field}_rgb.npz', img = img) 
+#     plt.imsave(IMAGES_DIR + f'{field}.png',arr=img[:,:,0] , cmap='gray_r')
